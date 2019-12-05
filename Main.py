@@ -19,6 +19,12 @@ from regionGenerator import generateProposals
 import timeit
 
 
+from keras.preprocessing.image import img_to_array
+from keras.models import load_model
+import os
+
+handModel = load_model('Hand Model4.hdf5')
+gestureModel = load_model('Gesture Model.hdf5')
 
 small = 40
 medium = 120
@@ -122,13 +128,11 @@ kernel2 = np.ones((5, 5), np.uint8)
 kernel3 = np.ones((3,3),np.uint8)
 
 
-
-
 fps = FPS().start()
 times = []
 delay = 0
 for i in range(100):
-
+    print(i)
     while not vs.hasUpdate():
         delay = 0
 
@@ -146,7 +150,7 @@ for i in range(100):
     stop = timeit.default_timer()
 
 
-    totalDiff = .5*np.square(diffH) + .5*np.square(diffV) + .5*np.square(diffS)
+    totalDiff = .5*np.square(diffH) + .5*np.square(diffS) #+ .5*np.square(diffV)
     threshold = np.average(totalDiff) + np.std(totalDiff)
 
 
@@ -160,6 +164,29 @@ for i in range(100):
 
     proposals = []
     generateProposals(original,mask2,0,proposals,0,0)
+
+
+
+    for a in range(len(proposals)):
+        image = proposals[a].image
+        image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+        this = np.copy(image)
+        image = cv2.resize(image, (64, 64))
+        image = image.astype("float") / 255.0
+        image = img_to_array(image)
+        image = np.expand_dims(image, axis=0)
+
+        (hand, no_hand) = handModel.predict(image)[0]
+
+        if(hand > no_hand):
+            print("found hand")
+            filename = '/Users/Kaboomtastic/ownCloud/DIP project Training Images/OurImages/im' + str(i*50+a) + '.jpg'
+            cv2.imwrite(filename, this)
+
+
+
+
+
 
     #for a in range(len(proposals)):
     #    temp = proposals[a].image

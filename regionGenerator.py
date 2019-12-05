@@ -27,11 +27,11 @@ def generateProposals(original,mask,count,imagePieces,row=0,col=0):
     while True:
         change = False
         if(minCol > 0):
-            if(sumCols[minCol - 1] > avgCol/(7-count)):
+            if(sumCols[minCol - 1] > avgCol/(15-2*count)):
                 minCol = minCol - 1
                 change = True
         if(maxCol < width-1):
-            if(sumCols[maxCol + 1] > avgCol/(7-count)):
+            if(sumCols[maxCol + 1] > avgCol/(15-2*count)):
                 maxCol = maxCol + 1
                 change = True
         if not change:
@@ -40,7 +40,7 @@ def generateProposals(original,mask,count,imagePieces,row=0,col=0):
     while True:
         change = False
         if(minRow > 0):
-            if(sumRows[minRow - 1] > avgRow/(7-count)):
+            if(sumRows[minRow - 1] > avgRow/(15-2*count)):
                 minRow = minRow - 1
                 change = True
         if not change:
