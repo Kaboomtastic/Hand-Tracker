@@ -27,11 +27,3 @@ def mouseclick(posx,posy):
         #mouseEvent(kCGEventMouseMoved, posx,posy);
         mouseEvent(kCGEventLeftMouseDown, posx,posy);
         mouseEvent(kCGEventLeftMouseUp, posx,posy);
-
-
-
-
-for i in range(1000):
-    mousemove(500,500)
-
-    time.sleep(.5)

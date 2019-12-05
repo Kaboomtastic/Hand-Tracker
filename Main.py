@@ -17,14 +17,50 @@ from backgroundCalculator import backgroundCalculator
 from skimage.metrics import structural_similarity as ssim
 from regionGenerator import generateProposals
 import timeit
-
-
+from multiprocessing import Pool
+import mouseControl
 from keras.preprocessing.image import img_to_array
 from keras.models import load_model
 import os
 
-handModel = load_model('Hand Model4.hdf5')
-gestureModel = load_model('Gesture Model.hdf5')
+
+
+def classify(proposal):
+    closed_hand = 0
+    finger_gun = 0
+    open_hand = 0
+    image = proposal.image
+    image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+    this = np.copy(image)
+    image = cv2.resize(image, (64, 64))
+    image = image.astype("float") / 255.0
+    image = img_to_array(image)
+    image = np.expand_dims(image, axis=0)
+
+    (hand, no_hand) = handModel.predict(image)[0]
+
+    if(hand > no_hand):
+        print(hand)
+        filename = '/Users/Kaboomtastic/ownCloud/DIP project Training Images/OurImages/im' + str(i*50+a) + '.jpg'
+        cv2.imwrite(filename, this)
+        handSegment = proposal
+        handImage = image
+
+        (closed_hand, finger_gun, open_hand) = gestureModel.predict(handImage)[0]
+
+    return hand, closed_hand, finger_gun, open_hand
+
+
+
+lastHandType = 0
+lastlastHandType = 0
+x = 320/2
+y = 160/2
+lastx = x
+lasty = y
+
+handModel = load_model('Hand Model8.hdf5')
+gestureModel = load_model('Gesture Model6.hdf5')
 
 small = 40
 medium = 120
@@ -131,7 +167,7 @@ kernel3 = np.ones((3,3),np.uint8)
 fps = FPS().start()
 times = []
 delay = 0
-for i in range(100):
+for i in range(1000):
     print(i)
     while not vs.hasUpdate():
         delay = 0
@@ -164,29 +200,45 @@ for i in range(100):
 
     proposals = []
     generateProposals(original,mask2,0,proposals,0,0)
-
-
-
+    finalSegment = proposals[0]
+    proposals.sort(key=lambda segment : segment.area)
+    handType = 0 #open, closed, finger_gun
     for a in range(len(proposals)):
-        image = proposals[a].image
-        image = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
-        this = np.copy(image)
-        image = cv2.resize(image, (64, 64))
-        image = image.astype("float") / 255.0
-        image = img_to_array(image)
-        image = np.expand_dims(image, axis=0)
-
-        (hand, no_hand) = handModel.predict(image)[0]
-
-        if(hand > no_hand):
-            print("found hand")
-            filename = '/Users/Kaboomtastic/ownCloud/DIP project Training Images/OurImages/im' + str(i*50+a) + '.jpg'
-            cv2.imwrite(filename, this)
-
-
+        hand, closed_hand, finger_gun, open_hand = classify(proposals[a])
+        if(hand > .95):
+            finalSegment = proposals[a]
+            if closed_hand> finger_gun:
+                if closed_hand > open_hand:
+                    handType = 2
+                else:
+                    handType = 1
+            if finger_gun > closed_hand:
+                if finger_gun > open_hand:
+                    handType = 3
+                else:
+                    handType = 1
+            break
 
 
-
+    if(handType != 0):
+        x = 1440 - finalSegment.col * 4.5 % 480
+        y = finalSegment.row * 10 % 360
+        #x = lastx + .5*(finalSegment.col + finalSegment.image.shape[1]/2 - x)
+        #y = lasty + .5*(finalSegment.row + finalSegment.image.shape[0]/2 - y)
+        # if(abs(lastx-x) > 50):
+        #     x = lastx
+        # if(abs(lasty-y) > 50):
+        #     y = lasty
+        # lastx = x
+        # lasty = y
+        print(x)
+        print(y)
+        #mouseControl.mousemove(int(2880-(2880/320)*x),int((1800/180)*y))
+        mouseControl.mousemove(x, y)
+        if(handType == lastHandType and handType == lastlastHandType and handType == 2):
+            mouseControl.mouseclick(int(2880-(2880/320)*x),int((1800/180)*y))
+        lastlastHandType = lastHandType
+        lastHandType = handType
 
     #for a in range(len(proposals)):
     #    temp = proposals[a].image
@@ -217,3 +269,29 @@ print(np.average(times))
 # When everything done, release the capture
 
 cv2.destroyAllWindows()
+
+
+
+
+
+
+#happy = False
+#p = Pool(6)
+#miseryCounter = 0
+#final = -1
+#while not happy and len(proposals) > 0:
+#    inputs = []
+#    for k in range(6):
+#        if(len(proposals)>0):
+#            inputs.append(proposals.pop(0))
+
+#    results = p.map(classify, inputs)
+
+#    print (results)
+#    for k in range(len(results)):
+#        if(results[k][0] > .9):
+#            happy = True
+#            final = results[k]
+#            break
+
+#print("here")

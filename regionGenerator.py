@@ -18,31 +18,43 @@ def generateProposals(original,mask,count,imagePieces,row=0,col=0):
     maxColSum = sumCols[maxColIdx]
 
     minCol = maxColIdx
+    if(minCol <7):
+        minCol = 7
     maxCol = maxColIdx
+    if(maxCol > width-7):
+        maxCol = width-7
     minRow = maxRowIdx
+    if(minRow < 7):
+        minRow = 7
     maxRow = height - 1
     avgRow = np.average(sumRows)
     avgCol = np.average(sumCols)
 
     while True:
         change = False
-        if(minCol > 0):
-            if(sumCols[minCol - 1] > avgCol/(15-2*count)):
-                minCol = minCol - 1
+        if(minCol > 6):
+            if(sumCols[minCol - 7] > avgCol/(15)):
                 change = True
-        if(maxCol < width-1):
-            if(sumCols[maxCol + 1] > avgCol/(15-2*count)):
-                maxCol = maxCol + 1
+            minCol = minCol - 7
+        else:
+            mincol = 0
+        if(maxCol < width-7):
+            if(sumCols[maxCol + 7] > avgCol/(15)):
                 change = True
+            maxCol = maxCol + 7
+        else:
+            maxCol = width - 1
         if not change:
             break
 
     while True:
         change = False
-        if(minRow > 0):
-            if(sumRows[minRow - 1] > avgRow/(15-2*count)):
-                minRow = minRow - 1
+        if(minRow > 6):
+            if(sumRows[minRow - 7] > avgRow/(15)):
                 change = True
+            minRow = minRow - 7
+        else:
+            minRow = 0
         if not change:
             break
 
