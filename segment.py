@@ -4,3 +4,4 @@ class segment:
         self.row = row
         self.col = col
         self.image = image
+        self.area = image.shape[0] * image.shape[1]
