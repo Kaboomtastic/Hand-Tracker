@@ -88,16 +88,11 @@ class backgroundCalculator:
         aveFrame[mask == 255] = 0
         aveFrame[mask == 0] = 255
         aveFrame = cv2.merge((aveFrame, aveFrame, aveFrame))
-
         aveFrame = aveFrame & frame
-
         backgroundAve = backgroundAve.astype(np.uint8)
         mask = cv2.merge((mask, mask, mask))
-
         temp = mask & backgroundAve
-
         aveFrame = aveFrame | temp
-
         self.newFrame = aveFrame.astype(np.float32)
         self.count = self.count + 1
         self.newFrameAvailable = True
