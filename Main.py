@@ -154,16 +154,18 @@ for i in range(100):
 
 
     mask = mask.astype(np.uint8)
-    bc.addNewFrame(original,backgroundAve,mask)
+    mask2 = np.copy(mask)
+    if i % 2 == 0:
+        bc.addNewFrame(original,backgroundAve,mask)
 
     proposals = []
-    generateProposals(original,mask,0,proposals,0,0)
+    generateProposals(original,mask2,0,proposals,0,0)
 
-    for a in range(len(proposals)):
-        temp = proposals[a].image
-        temp = cv2.cvtColor(temp, cv2.COLOR_HSV2BGR)
-        filename = '/Users/Kaboomtastic/ownCloud/DIP project Training Images/OurImages/im' + str(i*50+a) + '.jpg'
-        cv2.imwrite(filename, temp)
+    #for a in range(len(proposals)):
+    #    temp = proposals[a].image
+    #    temp = cv2.cvtColor(temp, cv2.COLOR_HSV2BGR)
+    #    filename = '/Users/Kaboomtastic/ownCloud/DIP project Training Images/OurImages/im' + str(i*50+a) + '.jpg'
+    #    cv2.imwrite(filename, temp)
 
     mask = cv2.merge((mask, mask, mask))
     output = original & mask
@@ -172,8 +174,8 @@ for i in range(100):
 
     times.append(stop - start)
 
-    if i % 1 == 0:
-        cv2.imshow("output", cv2.cvtColor(output, cv2.COLOR_HSV2BGR))
+    #if i % 1 == 0:
+    #    cv2.imshow("output", cv2.cvtColor(output, cv2.COLOR_HSV2BGR))
 
 
     #if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -188,21 +190,3 @@ print(np.average(times))
 # When everything done, release the capture
 
 cv2.destroyAllWindows()
-
-
-
-    #left = mask[0:height, 0:width/2]
-    #mid = mask[0:height, width/4:3*width/4]
-    #right = mask[0:height, width/2:width]
-
-    #leftResults =
-
-    #img = cv2.rectangle(img,(0,0),(20,20),(0,255,0),3)
-
-
-
-#def findRegion(inMask):
-
-
-#def findBounds(mask):
-    #for()
